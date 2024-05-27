@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Patient by ID</title>
+</head>
+<body>
+    <h1>Patient Search</h1>
+    <form method="post">
+        <input type="number" name="patient_id" placeholder="Patient ID" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if request.method == 'POST' %}
+        {% if selected_patient %}
+        <div>
+            <h2>Patient Details:</h2>
+            <p>ID: {{ selected_patient['id'] }}</p>
+            <p>Name: {{ selected_patient['name'] }}</p>
+        </div>
+        {% if medications %}
+        <div>
+            <h2>Medications Prescribed:</h2>
+            <table>
+                <tr>
+                    <th>Drug ID</th>
+                    <th>Drug Name</th>
+                </tr>
+                {% for medication in medications %}
+                <tr>
+                    <td>{{ medication.drug_id }}</td>
+                    <td>{{ medication.drug_name }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% else %}
+        <p>No medications for this patient.</p>
+        {% endif %}
+        {% else %}
+        <p>No patient with this ID.</p>
+        {% endif %}
+
+        <h2>Prescribe New Medication:</h2>
+        <form method="post">
+            <input type="hidden" name="patient_id" style="width: 200px;" value="{{ selected_patient['id'] }}">
+            <select name="drug_id">
+                {% for drug in all_drugs %}
+                <option value="{{ drug.id }}">{{ drug.drug_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="prescribe_drug">Prescribe</button>
+        </form>
+
+        {% if interaction_warning %}
+        <div style="color: red;">
+            <strong>{{ interaction_warning }}</strong>
+            <form method="post">
+                <input type="hidden" name="patient_id" value="{{ selected_patient['id'] }}">
+                <input type="hidden" name="drug_id" value="{{ request.form['drug_id'] }}">
+                <button type="submit" name="confirm_prescription">Confirm Prescription</button>
+                <button type="submit" name="cancel_prescription">Cancel</button>
+            </form>
+        </div>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
